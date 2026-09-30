@@ -37,62 +37,6 @@ jobs:
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
-      - name: Install 7-Zip (Direct)
-        run: |
-          Write-Host "Downloading 7-Zip..." -ForegroundColor Green
-          $zipUrl = "https://www.7-zip.org/a/7z2409-x64.exe"
-          $installerPath = "$env:TEMP\7z-installer.exe"
-          Invoke-WebRequest -Uri $zipUrl -OutFile $installerPath
-          Write-Host "Installing 7-Zip silently..." -ForegroundColor Cyan
-          Start-Process -FilePath $installerPath -ArgumentList "/S" -Wait
-          Remove-Item $installerPath -Force
-          Write-Host "7-Zip installed!" -ForegroundColor Green
-
-      - name: Connection Details
-        run: |
-          Write-Host "`n=== CONNECTION DETAILS (TAILSCALE) ===" -ForegroundColor Cyan
-          Write-Host "╔════════════════════════════════════════╗"
-          Write-Host "║        ENIGMANO RDP ACCESS             ║"
-          Write-Host "╠════════════════════════════════════════╣"
-          Write-Host "║ Host:     $env:TAILSCALE_IP             ║"
-          Write-Host "║ Username: runneradmin                   ║"
-          Write-Host "║ Password: P@ssw0rd!                     ║"
-          Write-Host "╚════════════════════════════════════════╝"
-
-          Write-Host "`nConnection Instructions:" -ForegroundColor Green
-          Write-Host "1. Install Tailscale on your device (phone, PC, etc.)"
-          Write-Host "2. Log in with the same Tailscale account"
-          Write-Host "3. Open Remote Desktop app and enter the IP above"
-          Write-Host "4. Use the provided credentials to connect"
-
-      - name: Keep Session Alive
-        run: |
-          Write-Host "`n=== SESSION ACTIVE ===" -ForegroundColor Green
-          Write-Host "EnigMano RDP instance is now running!" -ForegroundColor Cyan
-      - name: Install 7-Zip (Direct)
-        run: |
-          Write-Host "Downloading 7-Zip..." -ForegroundColor Green
-          $zipUrl = "https://www.7-zip.org/a/7z2409-x64.exe"
-          $installerPath = "$env:TEMP\7z-installer.exe"
-          Invoke-WebRequest -Uri $zipUrl -OutFile $installerPath
-          Write-Host "Installing 7-Zip silently..." -ForegroundColor Cyan
-          Start-Process -FilePath $installerPath -ArgumentList "/S" -Wait
-          Remove-Item $installerPath -Force
-          Write-Host "7-Zip installed!" -ForegroundColor Green
-
-      - name: Connection Details
-        run: |
-          Write-Host "`n=== CONNECTION DETAILS (TAILSCALE) ===" -ForegroundColor Cyan
-          Write-Host "╔════════════════════════════════════════════════════════╗"
-          Write-Host "║            ENIGMANO RDP ACCESS                           ║"
-          Write-Host "╚════════════════════════════════════════════════════════╝"
-          Write-Host "  Host:     $env:TAILSCALE_IP"
-          Write-Host "  Username: runneradmin"
-          Write-Host "  Password: P@ssw0rd!"
-          Write-Host ""
-
-          Write-Host "`nConnection Instructions:" -ForegroundColor Green
-          Write-Host "1. Install Tailscale on your 
 Write-Host "`n=== CONNECTION DETAILS (TAILSCALE) ===" -ForegroundColor Cyan
 Write-Host "╔════════════════════════════════════════════════════════╗" -ForegroundColor White
 Write-Host "║            ENIGMANO RDP ACCESS                           ║" -ForegroundColor Yellow
@@ -130,4 +74,64 @@ run: |
       
       Start-Sleep -Seconds 60
   }
+Write-Host "`n=== CONNECTION DETAILS (TAILSCALE) ===" -ForegroundColor Cyan
+Write-Host "╔════════════════════════════════════════════════════════╗" -ForegroundColor White
+Write-Host "║            ENIGMANO RDP ACCESS                           ║" -ForegroundColor Yellow
+Write-Host "╚════════════════════════════════════════════════════════╝" -ForegroundColor White
+Write-Host "  Host:     $env:TAILSCALE_IP"
+Write-Host "  Username: runneradmin"
+Write-Host "  Password: P@ssw0rd!"
+Write-Host ""
 
+Write-Host "`nConnection Instructions:" -ForegroundColor Green
+Write-Host "1. Install Tailscale on your device (phone, PC, etc.)"
+Write-Host "2. Log in with the same Tailscale account"
+Write-Host "3. Open Remote Desktop app and enter the IP above"
+Write-Host "4. Use the provided credentials to connect"
+
+name: Keep Session Alive
+run: |
+  Write-Host "`n=== SESSION ACTIVE ===" -ForegroundColor Green
+  Write-Host "EnigMano RDP instance is now running!" -ForegroundColor Cyan
+  Write-Host "Instance will remain active for up to 6 hours"
+  Write-Host "Do not close this window to maintain the connection`n"
+
+  $counter = 0
+  while ($true) {
+      $counter++
+      Write-Host "Session active - Heartbeat #$counter ($(Get-Date -Format 'HH:mm:ss'))"
+      
+      $tsStatus = & "C:\Program Files\Tailscale\tailscale.exe" status
+      if ($tsStatus -match "active") {
+          Write-Host "Tailscale status: ACTIVE" -ForegroundColor Green
+      } else {
+          Write-Host "Tailscale status: ERROR - Restarting..." -ForegroundColor Red
+          & "C:\Program Files\Tailscale\tailscale.exe" up
+      }
+      
+      Start-Sleep -Seconds 60
+  }
+      - name: Install 7-Zip (Direct)
+        run: |
+          Write-Host "Downloading 7-Zip..." -ForegroundColor Green
+          $zipUrl = "https://www.7-zip.org/a/7z2409-x64.exe"
+          $installerPath = "$env:TEMP\7z-installer.exe"
+          Invoke-WebRequest -Uri $zipUrl -OutFile $installerPath
+          Write-Host "Installing 7-Zip silently..." -ForegroundColor Cyan
+          Start-Process -FilePath $installerPath -ArgumentList "/S" -Wait
+          Remove-Item $installerPath -Force
+          Write-Host "7-Zip installed!" -ForegroundColor Green
+
+      - name: Connection Details
+        run: |
+          Write-Host "`n=== CONNECTION DETAILS (TAILSCALE) ===" -ForegroundColor Cyan
+          Write-Host "╔════════════════════════════════════════════════════════╗"
+          Write-Host "║            ENIGMANO RDP ACCESS                           ║"
+          Write-Host "╚════════════════════════════════════════════════════════╝"
+          Write-Host "  Host:     $env:TAILSCALE_IP"
+          Write-Host "  Username: runneradmin"
+          Write-Host "  Password: P@ssw0rd!"
+          Write-Host ""
+
+          Write-Host "`nConnection Instructions:" -ForegroundColor Green
+          Write-Host "1. Install Tailscale on your 
